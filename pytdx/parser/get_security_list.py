@@ -27,13 +27,15 @@ class GetSecurityList(BaseParser):
 
             one_bytes = body_buf[pos: pos + 29]
 
-            (code, volunit,
-             name_bytes, reversed_bytes1, decimal_point,
-             pre_close_raw, reversed_bytes2) = struct.unpack("<6sH8s4sBI4s", one_bytes)
+            #     Bonus1       uint16     // 用于计算权息数据
+            #     Bonus2       uint16     // 权息数量
+            (code, volunit, name_bytes, reversed_bytes1, decimal_point,
+             pre_close_raw, bonus1, bonus2) = struct.unpack("<6sH8sLBf2H", one_bytes)
 
             code = code.decode("utf-8")
             name = name_bytes.decode("gbk").rstrip("\x00")
-            pre_close = get_volume(pre_close_raw)
+            # pre_close = get_volume(pre_close_raw)
+
             pos += 29
 
             one = OrderedDict(
@@ -42,7 +44,10 @@ class GetSecurityList(BaseParser):
                     ('volunit', volunit),
                     ('decimal_point', decimal_point),
                     ('name', name),
-                    ('pre_close', pre_close),
+                    ('pre_close', pre_close_raw),
+                    ('bonus1', bonus1),
+                    ('bonus2', bonus2),
+                    ('reversed_bytes1', reversed_bytes1)
                 ]
             )
 
